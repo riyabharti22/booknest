@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BookNest — Your Reading Sanctuary</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { --cream:#f5f0e8; --dark:#1a1a2e; --brown:#8b5e3c; --gold:#c9a84c; --muted:#6b6570; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--cream); font-family:'DM Sans',sans-serif; color:var(--dark); min-height:100vh; }
+
+    nav { background:var(--dark); padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 20px rgba(0,0,0,0.3); }
+    .brand { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--gold); text-decoration:none; }
+    .nav-links { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; }
+    .nav-links a { color:#ccc; text-decoration:none; font-size:0.9rem; transition:color 0.2s; }
+    .nav-links a:hover { color:var(--gold); }
+    .btn-login { background:var(--gold); color:var(--dark)!important; padding:0.4rem 1rem; border-radius:20px; font-weight:500!important; white-space:nowrap; }
+    .btn-logout { border:1px solid #555; color:#ccc!important; padding:0.4rem 0.8rem; border-radius:20px; font-size:0.8rem!important; }
+
+    .hero { min-height:88vh; display:flex; align-items:center; justify-content:center; text-align:center; padding:4rem 1.5rem; position:relative; overflow:hidden; }
+    .hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 20% 50%,rgba(201,168,76,0.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(139,94,60,0.06) 0%,transparent 60%); }
+    .hero-content { position:relative; max-width:700px; width:100%; }
+    .hero-eyebrow { font-size:0.75rem; letter-spacing:4px; text-transform:uppercase; color:var(--gold); margin-bottom:1.5rem; }
+    .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(2.2rem,8vw,5.5rem); line-height:1.05; margin-bottom:1.5rem; }
+    .hero h1 em { font-style:italic; color:var(--brown); }
+    .hero p { font-size:1rem; color:var(--muted); line-height:1.7; margin-bottom:2.5rem; font-weight:300; }
+    .search-hero { display:flex; max-width:500px; margin:0 auto; border-radius:50px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.12); }
+    .search-hero input { flex:1; padding:0.9rem 1.2rem; border:none; outline:none; font-family:'DM Sans',sans-serif; font-size:0.9rem; background:white; min-width:0; }
+    .search-hero button { background:var(--dark); color:white; border:none; padding:0.9rem 1.4rem; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:500; white-space:nowrap; transition:background 0.2s; }
+    .search-hero button:hover { background:var(--brown); }
+
+    .floating-books { position:absolute; font-size:5rem; opacity:0.04; pointer-events:none; }
+    .floating-books:nth-child(1) { top:10%; left:5%; transform:rotate(-15deg); }
+    .floating-books:nth-child(2) { top:60%; right:8%; transform:rotate(10deg); font-size:7rem; }
+    .floating-books:nth-child(3) { bottom:15%; left:15%; transform:rotate(5deg); font-size:4rem; }
+
+    .section { padding:3rem 1.5rem; max-width:1200px; margin:0 auto; }
+    .section-title { font-family:'Playfair Display',serif; font-size:1.6rem; margin-bottom:0.5rem; }
+    .section-sub { color:var(--muted); font-size:0.9rem; margin-bottom:2rem; }
+    .books-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:1.2rem; }
+    .book-card { background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.06); transition:transform 0.2s,box-shadow 0.2s; }
+    .book-card:hover { transform:translateY(-4px); box-shadow:0 8px 25px rgba(0,0,0,0.12); }
+    .book-card img { width:100%; height:180px; object-fit:cover; }
+    .book-card-body { padding:0.75rem; }
+    .book-card-title { font-size:0.82rem; font-weight:500; margin-bottom:0.3rem; line-height:1.3; }
+    .book-status { font-size:0.72rem; color:var(--brown); font-weight:500; }
+    .empty-state { text-align:center; padding:3rem 1rem; color:var(--muted); }
+    .empty-state a { color:var(--brown); }
+    footer { text-align:center; padding:2rem 1rem; color:var(--muted); font-size:0.85rem; border-top:1px solid #e8e0d5; }
+
+    @media(max-width:600px) {
+      nav { padding:0.8rem 1rem; }
+      .brand { font-size:1.2rem; }
+      .nav-links { gap:0.6rem; }
+      .nav-links a { font-size:0.8rem; }
+      .hero { min-height:70vh; padding:3rem 1rem; }
+      .search-hero button { padding:0.9rem 1rem; font-size:0.85rem; }
+      .floating-books { display:none; }
+      .books-grid { grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="brand" href="/">📚 BookNest</a>
+    <div class="nav-links">
+      <a href="/search">Search</a>
+      <span sec:authorize="isAuthenticated()">
+        <a href="/my-books">My Books</a>
+        <a href="/logout" class="btn-logout">Logout</a>
+      </span>
+      <span sec:authorize="!isAuthenticated()">
+        <a href="/oauth2/authorization/github" class="btn-login">Login with GitHub</a>
+      </span>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <span class="floating-books">📖</span>
+    <span class="floating-books">📚</span>
+    <span class="floating-books">📕</span>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Your Reading Sanctuary</p>
+      <h1>Find your next<br><em>great read</em></h1>
+      <p>Track books, discover authors, and build your personal library — all in one beautiful place.</p>
+      <form class="search-hero" action="/search" method="get">
+        <input type="text" name="query" placeholder="Search by title or author...">
+        <button type="submit">Search →</button>
+      </form>
+    </div>
+  </section>
+
+  <div sec:authorize="isAuthenticated()">
+    <div class="section">
+      <h2 class="section-title">My Recent Books</h2>
+      <p class="section-sub">Your personal reading collection</p>
+      <div th:if="${books == null or books.isEmpty()}" class="empty-state">
+        <p style="font-size:3rem;margin-bottom:1rem;">📭</p>
+        <p>You haven't added any books yet.</p>
+        <a href="/search">Search for books to get started!</a>
+      </div>
+      <div class="books-grid" th:unless="${books == null or books.isEmpty()}">
+        <div th:each="book : ${books}">
+          <div class="book-card">
+            <img th:src="${book.coverUrl}" onerror="this.src='/images/no-cover.png'" alt="cover">
+            <div class="book-card-body">
+              <p class="book-card-title" th:text="${book.bookName}">Book Name</p>
+              <span class="book-status" th:text="${book.readingStatus}"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>© 2025 BookNest — Built with love for readers 📚</footer>
+</body>
+</html>

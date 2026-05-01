@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${book['title']}">Book</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { --cream:#f5f0e8; --dark:#1a1a2e; --brown:#8b5e3c; --gold:#c9a84c; --muted:#6b6570; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--cream); font-family:'DM Sans',sans-serif; color:var(--dark); }
+    nav { background:var(--dark); padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; }
+    .brand { color:var(--gold); font-family:'Playfair Display',serif; font-size:1.4rem; text-decoration:none; }
+    .nav-links { display:flex; gap:1rem; }
+    .nav-links a { color:#ccc; text-decoration:none; font-size:0.9rem; }
+    .nav-links a:hover { color:var(--gold); }
+    .book-container { max-width:1000px; margin:2.5rem auto; display:grid; grid-template-columns:240px 1fr; gap:2.5rem; padding:0 1.5rem; }
+    .book-cover img { width:100%; border-radius:12px; box-shadow:0 15px 40px rgba(0,0,0,0.15); }
+    .book-info h1 { font-family:'Playfair Display',serif; font-size:clamp(1.5rem,4vw,2rem); line-height:1.2; margin-bottom:0.5rem; }
+    .author-name { color:var(--brown); margin-bottom:1.5rem; font-weight:500; }
+    .desc { color:var(--muted); line-height:1.7; margin-bottom:1.5rem; max-height:180px; overflow:auto; font-weight:300; }
+    .box { background:white; padding:1.5rem; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.05); }
+    .box p { color:var(--muted); margin-bottom:1rem; font-size:0.9rem; }
+    label { font-size:0.85rem; font-weight:500; display:block; margin-bottom:0.3rem; }
+    select { width:100%; padding:0.6rem 0.8rem; margin-bottom:1rem; border-radius:8px; border:1px solid #ddd; font-family:'DM Sans',sans-serif; font-size:0.9rem; }
+    .btn { width:100%; padding:0.8rem; background:var(--dark); color:white; border:none; border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:500; font-size:0.95rem; transition:background 0.2s; }
+    .btn:hover { background:var(--brown); }
+    .btn-link { display:block; text-align:center; background:var(--dark); color:white; text-decoration:none; padding:0.8rem; border-radius:8px; font-weight:500; transition:background 0.2s; }
+    .btn-link:hover { background:var(--brown); }
+    footer { text-align:center; padding:2rem 1rem; color:var(--muted); font-size:0.85rem; border-top:1px solid #e8e0d5; margin-top:3rem; }
+
+    @media(max-width:700px) {
+      .book-container { grid-template-columns:1fr; gap:1.5rem; margin:1.5rem auto; }
+      .book-cover { max-width:200px; margin:0 auto; }
+      .book-info h1 { font-size:1.6rem; }
+    }
+    @media(max-width:400px) {
+      nav { padding:0.8rem 1rem; }
+      .brand { font-size:1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="brand">📚 BookNest</a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/search">Search</a>
+  </div>
+</nav>
+
+<div class="book-container">
+  <div class="book-cover">
+    <img th:src="${book['covers'] != null ? 'https://covers.openlibrary.org/b/id/' + book['covers'][0] + '-M.jpg' : '/images/no-cover.png'}"
+         onerror="this.src='/images/no-cover.png'" alt="Book Cover">
+  </div>
+
+  <div class="book-info">
+    <h1 th:text="${book['title']}">Title</h1>
+    <p class="author-name" th:text="${authorName != null ? 'by ' + authorName : 'Unknown Author'}"></p>
+
+    <div class="desc">
+      <p th:text="${book['description'] != null ?
+        (book['description'] instanceof T(java.util.Map) ?
+          book['description']['value'] : book['description'])
+        : 'No description available.'}"></p>
+    </div>
+
+    <div sec:authorize="!isAuthenticated()" class="box">
+      <p>Login to save and track this book</p>
+      <a href="/oauth2/authorization/github" class="btn-link">Login with GitHub</a>
+    </div>
+
+    <div sec:authorize="isAuthenticated()" class="box">
+      <form action="/save-book" method="post">
+        <input type="hidden" name="bookId" th:value="${#strings.replace(book['key'], '/works/', '')}">
+        <input type="hidden" name="bookName" th:value="${book['title']}">
+        <input type="hidden" name="coverUrl" th:value="${book['covers'] != null ? 'https://covers.openlibrary.org/b/id/' + book['covers'][0] + '-M.jpg' : '/images/no-cover.png'}">
+
+        <label>Status</label>
+        <select name="status">
+          <option value="WANT_TO_READ">🔖 Want to Read</option>
+          <option value="READING">📖 Currently Reading</option>
+          <option value="READ">✅ Read</option>
+        </select>
+
+        <label>Rating</label>
+        <select name="rating">
+          <option value="0">No rating</option>
+          <option value="1">★ 1 Star</option>
+          <option value="2">★★ 2 Stars</option>
+          <option value="3">★★★ 3 Stars</option>
+          <option value="4">★★★★ 4 Stars</option>
+          <option value="5">★★★★★ 5 Stars</option>
+        </select>
+
+        <button type="submit" class="btn">Save to My Books</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer>© 2025 BookNest — Built with love for readers 📚</footer>
+</body>
+</html>

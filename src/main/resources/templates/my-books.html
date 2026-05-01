@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Books — BookNest</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { --cream:#f5f0e8; --dark:#1a1a2e; --brown:#8b5e3c; --gold:#c9a84c; --muted:#6b6570; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--cream); font-family:'DM Sans',sans-serif; color:var(--dark); min-height:100vh; }
+    nav { background:var(--dark); padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+    .brand { font-family:'Playfair Display',serif; color:var(--gold); text-decoration:none; font-size:1.4rem; }
+    .nav-links { display:flex; gap:1rem; }
+    .nav-links a { color:#ccc; text-decoration:none; font-size:0.9rem; }
+    .nav-links a:hover { color:var(--gold); }
+    .container { max-width:1200px; margin:auto; padding:2.5rem 1.5rem; }
+    .page-title { font-family:'Playfair Display',serif; font-size:2rem; margin-bottom:0.3rem; }
+    .page-sub { color:var(--muted); font-weight:300; margin-bottom:2rem; }
+    .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2.5rem; }
+    .stat-card { background:white; padding:1rem; border-radius:12px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+    .stat-number { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--dark); }
+    .stat-label { font-size:0.75rem; color:var(--muted); margin-top:0.2rem; }
+    .section-title { font-family:'Playfair Display',serif; font-size:1.4rem; margin:2rem 0 1rem; }
+    .books-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:1.2rem; margin-bottom:1rem; }
+    .book-card { background:white; border-radius:12px; overflow:hidden; transition:transform 0.2s; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+    .book-card:hover { transform:translateY(-3px); }
+    .book-card img { width:100%; height:200px; object-fit:cover; display:block; background:#eee; }
+    .book-card-body { padding:0.7rem; }
+    .book-title { font-size:0.82rem; font-weight:600; line-height:1.3; margin-bottom:0.4rem; }
+    .book-status { font-size:0.7rem; padding:2px 8px; border-radius:10px; display:inline-block; margin-bottom:0.5rem; }
+    .status-READ { background:#d4edda; color:#155724; }
+    .status-READING { background:#fff3cd; color:#856404; }
+    .status-WANT_TO_READ { background:#cce5ff; color:#004085; }
+    .stars { color:var(--gold); font-size:0.8rem; margin-bottom:0.5rem; }
+    .actions { display:flex; gap:4px; flex-wrap:wrap; margin-top:0.4rem; }
+    .actions form { margin:0; }
+    .btn-small { font-size:0.7rem; padding:4px 8px; border:none; cursor:pointer; border-radius:6px; font-family:'DM Sans',sans-serif; }
+    .delete { background:#ff6b6b; color:white; }
+    .update { background:var(--dark); color:white; }
+    .empty-state { text-align:center; padding:4rem 1rem; color:var(--muted); }
+    .empty-state .icon { font-size:3.5rem; margin-bottom:1rem; }
+    .empty-state a { color:var(--brown); }
+    footer { text-align:center; padding:2rem 1rem; color:var(--muted); font-size:0.85rem; border-top:1px solid #e8e0d5; margin-top:3rem; }
+    .toast { position:fixed; bottom:1.5rem; right:1.5rem; background:var(--dark); color:white; padding:1rem 1.5rem; border-radius:12px; font-size:0.9rem; box-shadow:0 8px 30px rgba(0,0,0,0.2); z-index:9999; animation:slideIn 0.3s ease,fadeOut 0.5s ease 2.5s forwards; }
+    @keyframes slideIn { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+    @keyframes fadeOut { from{opacity:1} to{opacity:0;visibility:hidden} }
+
+    @media(max-width:600px) {
+      nav { padding:0.8rem 1rem; }
+      .brand { font-size:1.2rem; }
+      .stats-row { grid-template-columns:repeat(2,1fr); }
+      .page-title { font-size:1.6rem; }
+      .books-grid { grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:1rem; }
+      .book-card img { height:170px; }
+      .toast { right:1rem; left:1rem; text-align:center; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="brand">📚 BookNest</a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/search">Search</a>
+    <a href="/my-books">My Books</a>
+  </div>
+</nav>
+
+<div class="toast" th:if="${param.saved}">✅ Book added to your library!</div>
+
+<div class="container">
+  <h1 class="page-title">My Library</h1>
+  <p class="page-sub">Your personal reading collection</p>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-number" th:text="${books.size()}">0</div>
+      <div class="stat-label">Total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" th:text="${readingCount}">0</div>
+      <div class="stat-label">Reading</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" th:text="${readCount}">0</div>
+      <div class="stat-label">Read</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" th:text="${wantCount}">0</div>
+      <div class="stat-label">Want to Read</div>
+    </div>
+  </div>
+
+  <div th:if="${books == null or books.isEmpty()}" class="empty-state">
+    <div class="icon">📭</div>
+    <p>No books yet. <a href="/search">Search books to get started!</a></p>
+  </div>
+
+  <div th:unless="${books == null or books.isEmpty()}">
+
+    <h2 class="section-title">📖 Currently Reading</h2>
+    <div class="books-grid">
+      <div class="book-card" th:each="book : ${books}" th:if="${book.readingStatus == 'READING'}">
+        <a th:href="@{'/book/' + ${book.key.bookId}}">
+          <img th:src="${book.coverUrl != null ? book.coverUrl : '/images/no-cover.png'}" onerror="this.src='/images/no-cover.png'" loading="lazy">
+        </a>
+        <div class="book-card-body">
+          <div class="book-title" th:text="${book.bookName}">Title</div>
+          <span class="book-status status-READING">Reading</span>
+          <div class="actions">
+            <form th:action="@{/update-status}" method="post">
+              <input type="hidden" name="bookId" th:value="${book.key.bookId}">
+              <input type="hidden" name="status" value="READ">
+              <button class="btn-small update" type="submit">✅ Mark Read</button>
+            </form>
+            <form th:action="@{/delete-book}" method="post">
+              <input type="hidden" name="bookId" th:value="${book.key.bookId}">
+              <button class="btn-small delete" type="submit">🗑 Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section-title">✅ Read</h2>
+    <div class="books-grid">
+      <div class="book-card" th:each="book : ${books}" th:if="${book.readingStatus == 'READ'}">
+        <a th:href="@{'/book/' + ${book.key.bookId}}">
+          <img th:src="${book.coverUrl != null ? book.coverUrl : '/images/no-cover.png'}" onerror="this.src='/images/no-cover.png'" loading="lazy">
+        </a>
+        <div class="book-card-body">
+          <div class="book-title" th:text="${book.bookName}">Title</div>
+          <span class="book-status status-READ">Read</span>
+          <div class="stars">
+            <span th:each="i : ${#numbers.sequence(1,5)}" th:text="${i <= book.rating ? '★' : '☆'}"></span>
+          </div>
+          <div class="actions">
+            <form th:action="@{/delete-book}" method="post">
+              <input type="hidden" name="bookId" th:value="${book.key.bookId}">
+              <button class="btn-small delete" type="submit">🗑 Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section-title">🔖 Want to Read</h2>
+    <div class="books-grid">
+      <div class="book-card" th:each="book : ${books}" th:if="${book.readingStatus == 'WANT_TO_READ'}">
+        <a th:href="@{'/book/' + ${book.key.bookId}}">
+          <img th:src="${book.coverUrl != null ? book.coverUrl : '/images/no-cover.png'}" onerror="this.src='/images/no-cover.png'" loading="lazy">
+        </a>
+        <div class="book-card-body">
+          <div class="book-title" th:text="${book.bookName}">Title</div>
+          <span class="book-status status-WANT_TO_READ">Want to Read</span>
+          <div class="actions">
+            <form th:action="@{/update-status}" method="post">
+              <input type="hidden" name="bookId" th:value="${book.key.bookId}">
+              <input type="hidden" name="status" value="READING">
+              <button class="btn-small update" type="submit">▶ Start</button>
+            </form>
+            <form th:action="@{/delete-book}" method="post">
+              <input type="hidden" name="bookId" th:value="${book.key.bookId}">
+              <button class="btn-small delete" type="submit">🗑 Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>© 2025 BookNest — Built with love for readers 📚</footer>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search — BookNest</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { --cream:#f5f0e8; --dark:#1a1a2e; --brown:#8b5e3c; --gold:#c9a84c; --muted:#6b6570; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--cream); font-family:'DM Sans',sans-serif; color:var(--dark); min-height:100vh; }
+    nav { background:var(--dark); padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 20px rgba(0,0,0,0.3); }
+    .brand { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--gold); text-decoration:none; }
+    .nav-links { display:flex; gap:1rem; align-items:center; }
+    .nav-links a { color:#ccc; text-decoration:none; font-size:0.9rem; transition:color 0.2s; }
+    .nav-links a:hover { color:var(--gold); }
+    .search-header { background:var(--dark); padding:2.5rem 1.5rem; text-align:center; }
+    .search-header h1 { font-family:'Playfair Display',serif; color:white; font-size:clamp(1.5rem,5vw,2.2rem); margin-bottom:1.5rem; }
+    .search-bar { display:flex; max-width:550px; margin:0 auto; border-radius:50px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.3); }
+    .search-bar input { flex:1; padding:0.9rem 1.2rem; border:none; outline:none; font-family:'DM Sans',sans-serif; font-size:0.9rem; min-width:0; }
+    .search-bar button { background:var(--gold); color:var(--dark); border:none; padding:0.9rem 1.4rem; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:600; white-space:nowrap; transition:opacity 0.2s; }
+    .search-bar button:hover { opacity:0.85; }
+    .results-section { max-width:1200px; margin:0 auto; padding:2rem 1.5rem; }
+    .results-info { font-size:0.9rem; color:var(--muted); margin-bottom:1.5rem; }
+    .results-info span { color:var(--brown); font-weight:500; }
+    .books-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:1.2rem; }
+    .book-card { background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.06); transition:transform 0.2s,box-shadow 0.2s; display:flex; flex-direction:column; }
+    .book-card:hover { transform:translateY(-5px); box-shadow:0 10px 30px rgba(0,0,0,0.13); }
+    .book-card img { width:100%; height:200px; object-fit:cover; background:#eee; }
+    .book-card-body { padding:0.85rem; flex:1; display:flex; flex-direction:column; }
+    .book-title { font-size:0.83rem; font-weight:600; line-height:1.3; margin-bottom:0.3rem; flex:1; }
+    .book-author { font-size:0.75rem; color:var(--muted); margin-bottom:0.5rem; }
+    .book-year { font-size:0.72rem; color:var(--gold); font-weight:500; margin-bottom:0.5rem; }
+    .btn-view { display:block; text-align:center; background:var(--dark); color:white; text-decoration:none; padding:0.5rem; border-radius:8px; font-size:0.78rem; font-weight:500; transition:background 0.2s; }
+    .btn-view:hover { background:var(--brown); color:white; }
+    .empty-state { text-align:center; padding:4rem 1rem; color:var(--muted); }
+    .empty-state .icon { font-size:3.5rem; margin-bottom:1rem; }
+    .empty-state h3 { font-family:'Playfair Display',serif; font-size:1.4rem; margin-bottom:0.5rem; color:var(--dark); }
+    footer { text-align:center; padding:2rem 1rem; color:var(--muted); font-size:0.85rem; border-top:1px solid #e8e0d5; margin-top:3rem; }
+
+    @media(max-width:600px) {
+      nav { padding:0.8rem 1rem; }
+      .brand { font-size:1.2rem; }
+      .search-header { padding:2rem 1rem; }
+      .books-grid { grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:1rem; }
+      .book-card img { height:170px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="brand" href="/">📚 BookNest</a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/search">Search</a>
+    </div>
+  </nav>
+
+  <div class="search-header">
+    <h1>Search <em style="font-style:italic;color:var(--gold);">Millions</em> of Books</h1>
+    <form class="search-bar" action="/search" method="get">
+      <input type="text" name="query" placeholder="Try 'Harry Potter'..." th:value="${query}">
+      <button type="submit">Search →</button>
+    </form>
+  </div>
+
+  <div class="results-section">
+    <div th:if="${books != null and !books.isEmpty()}">
+      <p class="results-info">Showing results for <span th:text="'&quot;' + ${query} + '&quot;'"></span></p>
+      <div class="books-grid">
+        <div class="book-card" th:each="book : ${books}">
+          <img th:src="${book['cover_i'] != null ? 'https://covers.openlibrary.org/b/id/' + book['cover_i'] + '-M.jpg' : '/images/no-cover.png'}"
+               onerror="this.src='/images/no-cover.png'" alt="Cover">
+          <div class="book-card-body">
+            <p class="book-title" th:text="${book['title']}">Title</p>
+            <p class="book-author" th:text="${book['author_name'] != null ? book['author_name'][0] : 'Unknown Author'}">Author</p>
+            <p class="book-year" th:text="${book['first_publish_year'] != null ? book['first_publish_year'] : ''}"></p>
+            <a class="btn-view" th:href="@{'/book/' + ${#strings.replace(book['key'], '/works/', '')}}">View Book →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div th:if="${query != null and (books == null or books.isEmpty())}" class="empty-state">
+      <div class="icon">🔍</div>
+      <h3>No books found</h3>
+      <p>Try a different title or author name.</p>
+    </div>
+
+    <div th:if="${query == null or query.isBlank()}" class="empty-state">
+      <div class="icon">📚</div>
+      <h3>What will you read next?</h3>
+      <p>Search by book title, author name, or topic above.</p>
+    </div>
+  </div>
+
+  <footer>© 2025 BookNest — Built with love for readers 📚</footer>
+</body>
+</html>

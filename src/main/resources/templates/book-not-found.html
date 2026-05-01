@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Not Found — BookNest</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { --cream:#f5f0e8; --dark:#1a1a2e; --brown:#8b5e3c; --gold:#c9a84c; --muted:#6b6570; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--cream); font-family:'DM Sans',sans-serif; color:var(--dark); min-height:100vh; }
+    nav { background:var(--dark); padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+    .brand { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--gold); text-decoration:none; }
+    .nav-links { display:flex; gap:1rem; }
+    .nav-links a { color:#ccc; text-decoration:none; font-size:0.9rem; }
+    .nav-links a:hover { color:var(--gold); }
+    .container { min-height:88vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:2rem 1.5rem; }
+    .icon { font-size:4rem; margin-bottom:1.5rem; }
+    h1 { font-family:'Playfair Display',serif; font-size:clamp(2rem,6vw,3rem); margin-bottom:1rem; }
+    p { color:var(--muted); font-size:1rem; margin-bottom:2rem; font-weight:300; line-height:1.6; }
+    .btn { background:var(--dark); color:white; text-decoration:none; padding:0.9rem 2rem; border-radius:50px; font-weight:500; transition:background 0.2s; display:inline-block; }
+    .btn:hover { background:var(--brown); color:white; }
+    @media(max-width:400px) {
+      nav { padding:0.8rem 1rem; }
+      .brand { font-size:1.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="brand" href="/">📚 BookNest</a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/search">Search</a>
+    </div>
+  </nav>
+  <div class="container">
+    <div class="icon">📭</div>
+    <h1>Book Not Found</h1>
+    <p>Sorry, we couldn't find that book.<br>It may have been removed or the link is incorrect.</p>
+    <a href="/search" class="btn">Search Books →</a>
+  </div>
+</body>
+</html>
