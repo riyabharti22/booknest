@@ -1,6 +1,5 @@
 package com.booknest.booknest.ai;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,15 +12,10 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequiredArgsConstructor
 public class AiController {
 
     @Value("${groq.api.key}")
     private String groqApiKey;
-
-    private final WebClient groqClient = WebClient.builder()
-            .baseUrl("https://api.groq.com")
-            .build();
 
     @GetMapping("/ai-recommend")
     public String aiRecommendPage() {
@@ -29,25 +23,24 @@ public class AiController {
     }
 
     @PostMapping("/ai-recommend")
-    public String getRecommendations(@RequestParam String mood,
-                                     Model model) {
+    public String getRecommendations(@RequestParam String mood, Model model) {
         model.addAttribute("mood", mood);
         try {
+            WebClient client = WebClient.builder()
+                    .baseUrl("https://api.groq.com")
+                    .build();
+
             Map<String, Object> requestBody = Map.of(
                 "model", "llama3-8b-8192",
                 "messages", List.of(
-                    Map.of(
-                        "role", "system",
-                        "content", "You are a helpful book recommendation assistant. When a user describes their mood or interest, suggest 5 specific books with their author names and a one line reason why. Format each book as: 📖 Book Title by Author — reason"
-                    ),
-                    Map.of(
-                        "role", "user",
-                        "content", mood
-                    )
+                    Map.of("role", "system",
+                           "content", "You are a helpful book recommendation assistant. Suggest 5 books based on the user's mood. Format each as: 📖 Book Title by Author — one line reason"),
+                    Map.of("role", "user",
+                           "content", mood)
                 )
             );
 
-            Map<?, ?> response = groqClient.post()
+            Map<?, ?> response = client.post()
                     .uri("/openai/v1/chat/completions")
                     .header("Authorization", "Bearer " + groqApiKey)
                     .header("Content-Type", "application/json")
@@ -59,14 +52,12 @@ public class AiController {
             List<Map<?, ?>> choices = (List<Map<?, ?>>) response.get("choices");
             Map<?, ?> message = (Map<?, ?>) choices.get(0).get("message");
             String recommendation = (String) message.get("content");
-
             model.addAttribute("recommendations", recommendation);
 
         } catch (Exception e) {
             System.out.println("❌ GROQ ERROR: " + e.getMessage());
             model.addAttribute("recommendations", "Sorry, could not get recommendations. Try again!");
         }
-
         return "ai-recommend";
     }
 }
