@@ -18,12 +18,15 @@
     .input-card { background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 2rem; }
     textarea { width: 100%; padding: 1rem; border: 1px solid #ddd; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 1rem; resize: vertical; min-height: 100px; margin-bottom: 1rem; }
     textarea:focus { outline: none; border-color: var(--gold); }
-    .btn { background: var(--dark); color: white; border: none; padding: 0.8rem 2rem; border-radius: 10px; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
+    .btn { background: var(--dark); color: white; border: none; padding: 0.8rem 2rem; border-radius: 10px; font-size: 1rem; cursor: pointer; transition: background 0.2s; font-family: 'DM Sans', sans-serif; }
     .btn:hover { background: var(--brown); }
     .result-card { background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); white-space: pre-line; line-height: 1.8; }
     .result-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 1rem; color: var(--brown); }
     .mood-tag { display: inline-block; background: var(--cream); border: 1px solid var(--gold); color: var(--brown); padding: 0.3rem 1rem; border-radius: 20px; font-size: 0.85rem; margin-bottom: 1.5rem; }
     .loading { display: none; color: var(--muted); margin-top: 0.75rem; font-size: 0.9rem; }
+    .share-btn { padding: 0.5rem 1.2rem; border-radius: 8px; border: none; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; cursor: pointer; background: var(--dark); color: white; transition: opacity 0.2s; display: inline-block; }
+    .share-btn:hover { opacity: 0.85; }
+    .share-row { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
     footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.85rem; margin-top: 3rem; border-top: 1px solid #e8e0d5; }
   </style>
 </head>
@@ -56,7 +59,14 @@
   <div class="result-card" th:if="${recommendations != null and mood != null and !#strings.isEmpty(mood)}">
     <div class="result-title">📚 Your Personalized Picks</div>
     <div class="mood-tag" th:text="'Mood: ' + ${mood}"></div>
-    <div th:text="${recommendations}"></div>
+
+    <div class="share-row">
+      <button onclick="copyText()" class="share-btn" id="copy-btn">Copy</button>
+      <a id="whatsapp-btn" target="_blank" class="share-btn" style="background:#25D366; text-decoration:none;">Share on WhatsApp</a>
+      <a id="twitter-btn" target="_blank" class="share-btn" style="background:#1DA1F2; text-decoration:none;">Share on Twitter</a>
+    </div>
+
+    <div id="recs-text" th:text="${recommendations}"></div>
   </div>
 </div>
 
@@ -65,6 +75,31 @@
 <script>
   function showLoading() {
     document.getElementById('loading').style.display = 'block';
+  }
+
+  const recCard = document.querySelector('.result-card');
+  if (recCard) {
+    const mood = document.querySelector('.mood-tag')?.innerText || '';
+    const recs = document.getElementById('recs-text')?.innerText || '';
+    const fullText = mood + '\n\n' + recs + '\n\nGet AI book recommendations at BookNest: https://booknest-production-a533.up.railway.app/ai-recommend';
+
+    document.getElementById('whatsapp-btn').href =
+      'https://wa.me/?text=' + encodeURIComponent(fullText);
+
+    const tweetText = mood + ' — got 5 book recommendations from BookNest AI! https://booknest-production-a533.up.railway.app/ai-recommend';
+    document.getElementById('twitter-btn').href =
+      'https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweetText);
+  }
+
+  function copyText() {
+    const mood = document.querySelector('.mood-tag')?.innerText || '';
+    const recs = document.getElementById('recs-text')?.innerText || '';
+    const fullText = mood + '\n\n' + recs + '\n\nGet AI book recommendations at BookNest: https://booknest-production-a533.up.railway.app/ai-recommend';
+    navigator.clipboard.writeText(fullText).then(() => {
+      const btn = document.getElementById('copy-btn');
+      btn.innerText = 'Copied!';
+      setTimeout(() => btn.innerText = 'Copy', 2000);
+    });
   }
 </script>
 
