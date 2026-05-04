@@ -19,7 +19,9 @@ public class AiController {
     @Value("${groq.api.key}")
     private String groqApiKey;
 
-    private final WebClient.Builder webClientBuilder;
+    private final WebClient groqClient = WebClient.builder()
+            .baseUrl("https://api.groq.com")
+            .build();
 
     @GetMapping("/ai-recommend")
     public String aiRecommendPage() {
@@ -29,12 +31,8 @@ public class AiController {
     @PostMapping("/ai-recommend")
     public String getRecommendations(@RequestParam String mood,
                                      Model model) {
+        model.addAttribute("mood", mood);
         try {
-            WebClient client = webClientBuilder
-                    .baseUrl("https://api.groq.com")
-                    .build();
-
-            // Build request body
             Map<String, Object> requestBody = Map.of(
                 "model", "llama3-8b-8192",
                 "messages", List.of(
@@ -49,8 +47,7 @@ public class AiController {
                 )
             );
 
-            // Call Groq API
-            Map response = client.post()
+            Map<?, ?> response = groqClient.post()
                     .uri("/openai/v1/chat/completions")
                     .header("Authorization", "Bearer " + groqApiKey)
                     .header("Content-Type", "application/json")
@@ -59,13 +56,11 @@ public class AiController {
                     .bodyToMono(Map.class)
                     .block();
 
-            // Extract response text
-            List<Map> choices = (List<Map>) response.get("choices");
-            Map message = (Map) choices.get(0).get("message");
+            List<Map<?, ?>> choices = (List<Map<?, ?>>) response.get("choices");
+            Map<?, ?> message = (Map<?, ?>) choices.get(0).get("message");
             String recommendation = (String) message.get("content");
 
             model.addAttribute("recommendations", recommendation);
-            model.addAttribute("mood", mood);
 
         } catch (Exception e) {
             System.out.println("❌ GROQ ERROR: " + e.getMessage());

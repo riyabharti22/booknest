@@ -12,74 +12,18 @@
     .brand { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--gold); text-decoration: none; }
     .nav-links a { color: #ccc; text-decoration: none; margin-left: 1.5rem; font-size: 0.9rem; }
     .nav-links a:hover { color: var(--gold); }
-
     .container { max-width: 800px; margin: 4rem auto; padding: 0 2rem; }
     .page-title { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 0.5rem; }
     .page-sub { color: var(--muted); margin-bottom: 2.5rem; }
-
-    .input-card {
-      background: white;
-      border-radius: 16px;
-      padding: 2rem;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-      margin-bottom: 2rem;
-    }
-
-    textarea {
-      width: 100%;
-      padding: 1rem;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 1rem;
-      resize: vertical;
-      min-height: 100px;
-      margin-bottom: 1rem;
-    }
-
+    .input-card { background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 2rem; }
+    textarea { width: 100%; padding: 1rem; border: 1px solid #ddd; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 1rem; resize: vertical; min-height: 100px; margin-bottom: 1rem; }
     textarea:focus { outline: none; border-color: var(--gold); }
-
-    .btn {
-      background: var(--dark);
-      color: white;
-      border: none;
-      padding: 0.8rem 2rem;
-      border-radius: 10px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
+    .btn { background: var(--dark); color: white; border: none; padding: 0.8rem 2rem; border-radius: 10px; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
     .btn:hover { background: var(--brown); }
-
-    .result-card {
-      background: white;
-      border-radius: 16px;
-      padding: 2rem;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-      white-space: pre-line;
-      line-height: 1.8;
-    }
-
-    .result-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.3rem;
-      margin-bottom: 1rem;
-      color: var(--brown);
-    }
-
-    .mood-tag {
-      display: inline-block;
-      background: var(--cream);
-      border: 1px solid var(--gold);
-      color: var(--brown);
-      padding: 0.3rem 1rem;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .loading { display: none; color: var(--muted); margin-top: 0.5rem; }
-
+    .result-card { background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); white-space: pre-line; line-height: 1.8; }
+    .result-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 1rem; color: var(--brown); }
+    .mood-tag { display: inline-block; background: var(--cream); border: 1px solid var(--gold); color: var(--brown); padding: 0.3rem 1rem; border-radius: 20px; font-size: 0.85rem; margin-bottom: 1.5rem; }
+    .loading { display: none; color: var(--muted); margin-top: 0.75rem; font-size: 0.9rem; }
     footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.85rem; margin-top: 3rem; border-top: 1px solid #e8e0d5; }
   </style>
 </head>
@@ -99,7 +43,6 @@
   <h1 class="page-title">🤖 AI Book Recommendations</h1>
   <p class="page-sub">Tell us your mood or interest and our AI will suggest the perfect books for you</p>
 
-  <!-- Input Form -->
   <div class="input-card">
     <form action="/ai-recommend" method="post" onsubmit="showLoading()">
       <textarea name="mood"
@@ -110,11 +53,10 @@
     </form>
   </div>
 
-  <!-- Results -->
-  <div class="result-card" th:if="${recommendations != null}">
+  <div class="result-card" th:if="${recommendations != null and mood != null and !#strings.isEmpty(mood)}">
     <div class="result-title">📚 Your Personalized Picks</div>
-    <div class="mood-tag" th:text="'Mood: ' + ${mood}">Mood</div>
-    <div th:text="${recommendations}">Recommendations will appear here</div>
+    <div class="mood-tag" th:text="'Mood: ' + ${mood}"></div>
+    <div th:text="${recommendations}"></div>
   </div>
 </div>
 
