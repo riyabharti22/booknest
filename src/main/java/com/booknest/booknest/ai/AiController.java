@@ -32,7 +32,7 @@ public class AiController {
                     .build();
 
             Map<String, Object> requestBody = Map.of(
-                "model", "llama3-8b-8192",
+                "model", "llama-3.3-70b-versatile",
                 "messages", List.of(
                     Map.of("role", "system",
                            "content", "You are a helpful book recommendation assistant. Suggest 5 books based on the user's mood. Format each as: 📖 Book Title by Author — one line reason"),
