@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.List;
 import java.util.Map;
@@ -54,9 +55,14 @@ public class AiController {
             String recommendation = (String) message.get("content");
             model.addAttribute("recommendations", recommendation);
 
+        } catch (WebClientResponseException e) {
+            // FIX: Print full response body to see exact Groq error
+            System.out.println("❌ GROQ STATUS: " + e.getStatusCode());
+            System.out.println("❌ GROQ BODY: " + e.getResponseBodyAsString());
+            model.addAttribute("recommendations", "Error: " + e.getResponseBodyAsString());
         } catch (Exception e) {
             System.out.println("❌ GROQ ERROR: " + e.getMessage());
-            model.addAttribute("recommendations", "Sorry, could not get recommendations. Try again!");
+            model.addAttribute("recommendations", "Error: " + e.getMessage());
         }
         return "ai-recommend";
     }
