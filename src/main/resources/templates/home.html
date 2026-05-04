@@ -48,6 +48,30 @@
     .book-status { font-size:0.72rem; color:var(--brown); font-weight:500; }
     .empty-state { text-align:center; padding:3rem 1rem; color:var(--muted); }
     .empty-state a { color:var(--brown); }
+
+    .ai-banner {
+      max-width:1200px;
+      margin:0 auto 1rem;
+      padding:0 1.5rem;
+    }
+    .ai-banner a {
+      display:flex;
+      align-items:center;
+      gap:1rem;
+      background:linear-gradient(135deg, var(--dark), #2d2d4e);
+      color:white;
+      padding:1.2rem 1.8rem;
+      border-radius:16px;
+      text-decoration:none;
+      transition:transform 0.2s, box-shadow 0.2s;
+      box-shadow:0 4px 15px rgba(0,0,0,0.15);
+    }
+    .ai-banner a:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(0,0,0,0.2); }
+    .ai-banner-icon { font-size:2rem; }
+    .ai-banner-text h3 { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--gold); }
+    .ai-banner-text p { font-size:0.85rem; color:#aaa; margin-top:0.2rem; }
+    .ai-banner-arrow { margin-left:auto; font-size:1.5rem; color:var(--gold); }
+
     footer { text-align:center; padding:2rem 1rem; color:var(--muted); font-size:0.85rem; border-top:1px solid #e8e0d5; }
 
     @media(max-width:600px) {
@@ -69,6 +93,7 @@
       <a href="/search">Search</a>
       <span sec:authorize="isAuthenticated()">
         <a href="/my-books">My Books</a>
+        <a href="/ai-recommend">🤖 AI Picks</a>
         <a href="/logout" class="btn-logout">Logout</a>
       </span>
       <span sec:authorize="!isAuthenticated()">
@@ -91,6 +116,18 @@
       </form>
     </div>
   </section>
+
+  <!-- AI Banner -->
+  <div class="ai-banner">
+    <a href="/ai-recommend">
+      <div class="ai-banner-icon">🤖</div>
+      <div class="ai-banner-text">
+        <h3>AI Book Recommendations</h3>
+        <p>Tell us your mood and our AI will suggest the perfect book for you</p>
+      </div>
+      <div class="ai-banner-arrow">→</div>
+    </a>
+  </div>
 
   <div sec:authorize="isAuthenticated()">
     <div class="section">

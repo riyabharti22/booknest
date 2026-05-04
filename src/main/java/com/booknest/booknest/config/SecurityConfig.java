@@ -11,12 +11,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable()) // ✅ Fixes 403 on /save-book
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/",
                     "/book/**",
                     "/search",
+                    "/ai-recommend",
                     "/css/**",
                     "/images/**"
                 ).permitAll()
